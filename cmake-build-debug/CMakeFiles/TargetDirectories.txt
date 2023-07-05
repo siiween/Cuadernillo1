@@ -1,3 +1,0 @@
-C:/Users/rs13188/CLionProjects/Cuadernillo1/cmake-build-debug/CMakeFiles/Cuadernillo1.dir
-C:/Users/rs13188/CLionProjects/Cuadernillo1/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/rs13188/CLionProjects/Cuadernillo1/cmake-build-debug/CMakeFiles/rebuild_cache.dir

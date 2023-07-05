@@ -1,4 +1,9 @@
-#include "TComplejo.h"
+
+#ifndef TVECTORCOM_H
+#define TVECTORCOM_H
+
+
+#include "tcomplejo.h"
 
 class TVectorCom {
 private:
@@ -31,3 +36,5 @@ public:
     // Funciones amigas
     friend ostream& operator<<(ostream&, TVectorCom&);
 };
+
+#endif

@@ -2,7 +2,7 @@
      EsVacia, Obtener
 */
 #include <iostream>
-#include "../include/tlistacom.h"
+#include "tlistacom.h"
 
 using namespace std;
 

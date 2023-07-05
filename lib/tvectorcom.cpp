@@ -27,9 +27,12 @@ TVectorCom::TVectorCom(TVectorCom& v) {
     }
 }
 
-// Destructor
 TVectorCom::~TVectorCom() {
-    delete[] c;
+    if (c != nullptr) {
+        delete[] c;
+        c = nullptr;  // Establecer el puntero a nullptr después de liberar la memoria
+        tamano = 0;   // Establecer el tamaño a 0
+    }
 }
 
 // Sobrecarga del operador de asignación
