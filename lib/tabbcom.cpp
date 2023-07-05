@@ -1,105 +1,106 @@
 #include "tabbcom.h"
 
-// Implementación del constructor por defecto
-TABBCom::TABBCom() : nodo(NULL) {}
+// Implementación de la clase TNodoABB
 
-// Implementación del constructor de copia
-TABBCom::TABBCom(const TABBCom &abb) {
-    if (abb.nodo != NULL) {
-        nodo = new TNodoABB();
-        nodo->item = abb.nodo->item;
-        nodo->iz = abb.nodo->iz;
-        nodo->de = abb.nodo->de;
-    } else {
-        nodo = NULL;
-    }
-}
+TNodoABB::TNodoABB() : iz(), de() {}
 
-// Implementación del destructor
-TABBCom::~TABBCom() {
-    if (nodo != NULL) {
-        delete nodo;
-        nodo = NULL;
-    }
-}
+TNodoABB::TNodoABB(const TNodoABB &nodo) : item(nodo.item), iz(nodo.iz), de(nodo.de) {}
 
-// Implementación del operador de asignación
-TABBCom &TABBCom::operator=(const TABBCom &abb) {
-    if (this != &abb) {
-        if (nodo != NULL) {
-            delete nodo;
-            nodo = NULL;
-        }
-        if (abb.nodo != NULL) {
-            nodo = new TNodoABB();
-            nodo->item = abb.nodo->item;
-            nodo->iz = abb.nodo->iz;
-            nodo->de = abb.nodo->de;
-        }
+TNodoABB::~TNodoABB() {}
+
+TNodoABB &TNodoABB::operator=(const TNodoABB &nodo)
+{
+    if (this != &nodo)
+    {
+        item = nodo.item;
+        iz = nodo.iz;
+        de = nodo.de;
     }
     return *this;
 }
 
-// Implementación del operador de igualdad
-bool TABBCom::operator==(const TABBCom &abb) {
-    return EsVacio() && abb.EsVacio() || (nodo != NULL && abb.nodo != NULL && *nodo == *abb.nodo);
+// Implementación de la clase TABBCom
+
+TABBCom::TABBCom() : nodo(NULL) {}
+
+TABBCom::TABBCom(const TABBCom &abb)
+{
+    Copiar(abb);
 }
 
-// Implementación del método EsVacio
-bool TABBCom::EsVacio() {
-    return nodo == NULL;
+TABBCom::~TABBCom()
+{
+    BorrarNodos(nodo);
 }
 
-// Implementación del método Insertar
-bool TABBCom::Insertar(TComplejo &complejo) {
-    if (Buscar(complejo)) {
-        return false; // El elemento ya existe en el árbol
+TABBCom &TABBCom::operator=(const TABBCom &abb)
+{
+    if (this != &abb)
+    {
+        BorrarNodos(nodo);
+        Copiar(abb);
     }
+    return *this;
+}
 
-    if (EsVacio()) {
+bool TABBCom::operator==(const TABBCom &abb)
+{
+    return (*nodo == *abb.nodo);
+}
+
+bool TABBCom::EsVacio()
+{
+    return (nodo == NULL);
+}
+
+bool TABBCom::Insertar(const TComplejo &c)
+{
+    if (Buscar(c))
+        return false;
+    if (EsVacio())
+    {
         nodo = new TNodoABB();
-        nodo->item = complejo;
+        nodo->item = c;
         return true;
-    } else {
-        if (complejo.Mod() < nodo->item.Mod()) {
-            return nodo->iz.Insertar(complejo);
-        } else {
-            return nodo->de.Insertar(complejo);
-        }
     }
+    else if (c.Mod() < nodo->item.Mod())
+        return nodo->iz.Insertar(c);
+    else
+        return nodo->de.Insertar(c);
 }
 
-// Implementación del método Borrar
-bool TABBCom::Borrar(TComplejo &complejo) {
-    if (EsVacio()) {
-        return false; // El árbol está vacío, no se puede borrar
-    }
-
-    if (!Buscar(complejo)) {
-        return false; // El elemento no existe en el árbol, no se puede borrar
-    }
-
-    if (complejo.Mod() < nodo->item.Mod()) {
-        return nodo->iz.Borrar(complejo);
-    } else if (complejo.Mod() > nodo->item.Mod()) {
-        return nodo->de.Borrar(complejo);
-    } else {
-        if (nodo->iz.EsVacio() && nodo->de.EsVacio()) {
+bool TABBCom::Borrar(const TComplejo &c)
+{
+    if (EsVacio())
+        return false;
+    else if (c.Mod() < nodo->item.Mod())
+        return nodo->iz.Borrar(c);
+    else if (c.Mod() > nodo->item.Mod())
+        return nodo->de.Borrar(c);
+    else
+    {
+        if (nodo->iz.EsVacio() && nodo->de.EsVacio())
+        {
             delete nodo;
             nodo = NULL;
-        } else if (nodo->de.EsVacio()) {
+        }
+        else if (nodo->iz.EsVacio())
+        {
+            TNodoABB *aux = nodo;
+            nodo = nodo->de.nodo;
+            aux->de.nodo = NULL;
+            delete aux;
+        }
+        else if (nodo->de.EsVacio())
+        {
             TNodoABB *aux = nodo;
             nodo = nodo->iz.nodo;
             aux->iz.nodo = NULL;
             delete aux;
         }
-        else if (nodo->iz.EsVacio()) {
-            TNodoABB *aux = nodo;
-            nodo = nodo->de.nodo;
-            aux->de.nodo = NULL;
-            delete aux;
-        } else {
-            TNodoABB *maxIzq = nodo->iz.BuscarMax();
+        else
+        {
+            TNodoABB *maxIzq = nodo->iz.Maximo();
             nodo->item = maxIzq->item;
             nodo->iz.Borrar(maxIzq->item);
         }
@@ -107,140 +108,172 @@ bool TABBCom::Borrar(TComplejo &complejo) {
     }
 }
 
-// Implementación del método Buscar
-bool TABBCom::Buscar(TComplejo &complejo) {
-    if (EsVacio()) {
-        return false; // El árbol está vacío, no se puede buscar
-    }
-
-    if (complejo.Mod() < nodo->item.Mod()) {
-        return nodo->iz.Buscar(complejo);
-    } else if (complejo.Mod() > nodo->item.Mod()) {
-        return nodo->de.Buscar(complejo);
-    } else {
-        return true; // El elemento ha sido encontrado
-    }
+bool TABBCom::Buscar(const TComplejo &c)
+{
+    if (EsVacio())
+        return false;
+    else if (c.Mod() < nodo->item.Mod())
+        return nodo->iz.Buscar(c);
+    else if (c.Mod() > nodo->item.Mod())
+        return nodo->de.Buscar(c);
+    else
+        return true;
 }
 
-// Implementación del método BuscarMax
-TNodoABB *TABBCom::BuscarMax() {
-    if (EsVacio()) {
-        return NULL; // El árbol está vacío, no se puede buscar el máximo
-    }
-
-    if (nodo->de.EsVacio()) {
-        return nodo; // El nodo actual es el máximo
-    }
-
-    return nodo->de.BuscarMax();
+TComplejo TABBCom::Raiz() const
+{
+    if (EsVacio())
+        return TComplejo();
+    return nodo->item;
 }
 
-// Implementación del método Inorden
-TVectorCom TABBCom::Inorden() {
-    int posicion = 1;
-    TVectorCom vector(Tamaño());
-    InordenAux(vector, posicion);
-    return vector;
-}
-
-// Implementación del método InordenAux
-void TABBCom::InordenAux(TVectorCom &vector, int &posicion) {
-    if (!EsVacio()) {
-        nodo->iz.InordenAux(vector, posicion);
-        vector[posicion] = nodo->item;
-        posicion++;
-        nodo->de.InordenAux(vector, posicion);
-    }
-}
-
-// Implementación del método Niveles
-TVectorCom TABBCom::Niveles() {
-    int posicion = 1;
-    int nivel = 1;
-    int maxNivel = Altura();
-    TVectorCom vector(Tamaño());
-    Cola<TABBCom> cola;
-    cola.Encolar(*this);
-
-    while (!cola.EsVacia()) {
-        TABBCom abb = cola.Desencolar();
-        vector[posicion] = abb.nodo->item;
-        posicion++;
-
-        if (abb.nodo->iz.nodo != NULL) {
-            cola.Encolar(abb.nodo->iz);
-        }
-        if (abb.nodo->de.nodo != NULL) {
-            cola.Encolar(abb.nodo->de);
-        }
-
-        nivel++;
-        if (nivel > maxNivel) {
-            break;
-        }
-    }
-
-    return vector;
-}
-
-// Implementación del método Altura
-int TABBCom::Altura() {
-    if (EsVacio()) {
-        return 0; // El árbol está vacío, altura 0
-    }
-
+int TABBCom::Altura() const
+{
+    if (EsVacio())
+        return 0;
     int alturaIzq = nodo->iz.Altura();
     int alturaDer = nodo->de.Altura();
-
-    return 1 + (alturaIzq > alturaDer ? alturaIzq : alturaDer);
+    return 1 + ((alturaIzq > alturaDer) ? alturaIzq : alturaDer);
 }
 
-// Implementación del método Tamaño
-int TABBCom::Tamaño() {
-    if (EsVacio()) {
-        return 0; // El árbol está vacío, tamaño 0
+int TABBCom::Nodos() const
+{
+    if (EsVacio())
+        return 0;
+    return 1 + nodo->iz.Nodos() + nodo->de.Nodos();
+}
+
+int TABBCom::NodosHoja() const
+{
+    if (EsVacio())
+        return 0;
+    if (nodo->iz.EsVacio() && nodo->de.EsVacio())
+        return 1;
+    return nodo->iz.NodosHoja() + nodo->de.NodosHoja();
+}
+
+TVectorCom TABBCom::Inorden() const
+{
+    int pos = 1;
+    TVectorCom v(Nodos());
+    InordenAux(v, pos);
+    return v;
+}
+
+void TABBCom::InordenAux(TVectorCom &v, int &pos) const
+{
+    if (!EsVacio())
+    {
+        nodo->iz.InordenAux(v, pos);
+        v[pos] = nodo->item;
+        pos++;
+        nodo->de.InordenAux(v, pos);
     }
-
-    return 1
-       + nodo->iz.Tamaño() + nodo->de.Tamaño();
 }
 
-// Implementación del método Vaciar
-void TABBCom::Vaciar() {
-    if (nodo != NULL) {
+TVectorCom TABBCom::Preorden() const
+{
+    int pos = 1;
+    TVectorCom v(Nodos());
+    PreordenAux(v, pos);
+    return v;
+}
+
+void TABBCom::PreordenAux(TVectorCom &v, int &pos) const
+{
+    if (!EsVacio())
+    {
+        v[pos] = nodo->item;
+        pos++;
+        nodo->iz.PreordenAux(v, pos);
+        nodo->de.PreordenAux(v, pos);
+    }
+}
+
+TVectorCom TABBCom::Postorden() const
+{
+    int pos = 1;
+    TVectorCom v(Nodos());
+    PostordenAux(v, pos);
+    return v;
+}
+
+void TABBCom::PostordenAux(TVectorCom &v, int &pos) const
+{
+    if (!EsVacio())
+    {
+        nodo->iz.PostordenAux(v, pos);
+        nodo->de.PostordenAux(v, pos);
+        v[pos] = nodo->item;
+        pos++;
+    }
+}
+
+TVectorCom TABBCom::Niveles() const
+{
+    TVectorCom v(Nodos());
+    if (!EsVacio())
+    {
+        TColaCom cola;
+        int pos = 1;
+        TNodoABB *nodoActual;
+        cola.Encolar(Raiz());
+        while (!cola.EsVacia())
+        {
+            cola.Primero().MostrarComplejo();
+            v[pos] = cola.Primero();
+            pos++;
+            nodoActual = nodo->iz.nodo;
+            if (!nodoActual->iz.EsVacio())
+                cola.Encolar(nodoActual->iz.nodo->item);
+            if (!nodoActual->de.EsVacio())
+                cola.Encolar(nodoActual->de.nodo->item);
+            cola.Desencolar();
+        }
+    }
+    return v;
+}
+
+ostream &operator<<(ostream &os, const TABBCom &abb)
+{
+    os << abb.Inorden();
+    return os;
+}
+
+void TABBCom::Copiar(const TABBCom &abb)
+{
+    if (abb.nodo == NULL)
+        nodo = NULL;
+    else
+    {
+        nodo = new TNodoABB();
+        nodo->item = abb.nodo->item;
+        nodo->iz.Copiar(abb.nodo->iz);
+        nodo->de.Copiar(abb.nodo->de);
+    }
+}
+
+void TABBCom::BorrarNodos(TNodoABB *&nodo)
+{
+    if (nodo != NULL)
+    {
+        BorrarNodos(nodo->iz.nodo);
+        BorrarNodos(nodo->de.nodo);
         delete nodo;
         nodo = NULL;
     }
 }
 
-// Implementación del método operator+
-TABBCom TABBCom::operator+(const TABBCom &abb) {
-    TABBCom nuevoArbol(*this);
-    nuevoArbol.AgregarArbol(abb.nodo);
-    return nuevoArbol;
-}
-
-// Implementación del método AgregarArbol
-void TABBCom::AgregarArbol(TNodoABB *nodo) {
-    if (nodo != NULL) {
-        Insertar(nodo->item);
-        AgregarArbol(nodo->iz.nodo);
-        AgregarArbol(nodo->de.nodo);
+TComplejo TABBCom::Maximo() const
+{
+    if (!EsVacio())
+    {
+        TNodoABB *aux = nodo;
+        while (!aux->de.EsVacio())
+        {
+            aux = aux->de.nodo;
+        }
+        return aux->item;
     }
-}
-
-// Implementación del método operator-
-TABBCom TABBCom::operator-(const TABBCom &abb) {
-    TABBCom nuevoArbol(*this);
-    nuevoArbol.QuitarArbol(abb.nodo);
-    return nuevoArbol;
-}
-
-// Implementación del método QuitarArbol
-void TABBCom::QuitarArbol(TNodoABB *nodo) {
-    if (nodo != NULL) {
-        Borrar(nodo->item);
-        QuitarArbol(nodo->iz.nodo);
-        QuitarArbol(nodo->de.nodo);
-    }
+    return TComplejo();
 }

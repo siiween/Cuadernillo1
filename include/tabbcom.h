@@ -1,59 +1,58 @@
-#ifndef TABBCOM_H
-#define TABBCOM_H
+#ifndef _TABBCom_
+#define _TABBCom_
 
 #include "tcomplejo.h"
 #include "tvectorcom.h"
 
 class TNodoABB;
-
-class TABBCom {
+class TABBCom
+{
     friend class TNodoABB;
-    friend ostream &operator<<(ostream &, const TABBCom &);
 
 private:
-    TNodoABB *raiz;
+    TNodoABB *nodo;
+
+    void Copiar(const TABBCom &abb);
+    void BorrarNodos(TNodoABB *&nodo);
+    TComplejo Maximo() const;
 
 public:
     TABBCom();
-    TABBCom(const TABBCom &);
+    TABBCom(const TABBCom &abb);
     ~TABBCom();
-    TABBCom &operator=(const TABBCom &);
-    bool operator==(const TABBCom &) const;
-    bool operator!=(const TABBCom &) const;
-    bool EsVacio() const;
-    bool Insertar(const TComplejo &);
-    bool Borrar(const TComplejo &);
-    bool Buscar(const TComplejo &) const;
+    TABBCom &operator=(const TABBCom &abb);
+
+    bool operator==(const TABBCom &abb);
+
+    bool EsVacio();
+    bool Insertar(const TComplejo &c);
+    bool Borrar(const TComplejo &c);
+    bool Buscar(const TComplejo &c);
     TComplejo Raiz() const;
     int Altura() const;
     int Nodos() const;
     int NodosHoja() const;
+
     TVectorCom Inorden() const;
     TVectorCom Preorden() const;
     TVectorCom Postorden() const;
     TVectorCom Niveles() const;
 
-private:
-    void Copiar(const TABBCom &);
-    void BorrarNodos(TNodoABB *);
-    void InordenAux(TVectorCom &, int &, TNodoABB *) const;
-    void PreordenAux(TVectorCom &, int &, TNodoABB *) const;
-    void PostordenAux(TVectorCom &, int &, TNodoABB *) const;
+    friend ostream &operator<<(ostream &os, const TABBCom &abb);
 };
 
-class TNodoABB {
+class TNodoABB
+{
     friend class TABBCom;
 
 private:
     TComplejo item;
-    TABBCom iz;
-    TABBCom de;
+    TABBCom iz, de;
 
 public:
     TNodoABB();
-    TNodoABB(const TNodoABB &);
+    TNodoABB(const TNodoABB &nodo);
     ~TNodoABB();
-    TNodoABB &operator=(const TNodoABB &);
+    TNodoABB &operator=(const TNodoABB &nodo);
 };
-
-#endif /* TABBCOM_H */
+#endif
